@@ -1,0 +1,49 @@
+{
+  "title": "Security Assessment Report: Public Demonstration",
+  "title_si": "Public Demonstration Security Assessment Report",
+  "author": "NoScope (L.G Sithum Sanjana)",
+  "client": "Fictional Demonstration Client",
+  "version": "1.0-public",
+  "executive_summary": "This public demo uses fictionalized findings to demonstrate how a security assessment can communicate risk, impact and remediation without exposing client information or real engagement evidence.",
+  "executive_summary_si": "මෙය client තොරතුරු හෝ සත්‍ය engagement evidence හෙළි නොකර security assessment report එකක risk, impact සහ remediation පෙන්වන fictional public demonstration එකකි.",
+  "methodology": "OWASP Testing Guide, PTES, NIST SP 800-115",
+  "severity_summary": {
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "low": 1,
+    "informational": 0
+  },
+  "findings": [
+    {
+      "id": "DEMO-01",
+      "title": "Broken Object-Level Authorization in a Demo API",
+      "severity": "High",
+      "cvss": 8.1,
+      "cwe": "CWE-639",
+      "description": "A fictional API example does not consistently verify whether the authenticated user owns the requested object.",
+      "impact": "An unauthorized user could view or modify another test user's demo resource.",
+      "remediation": "Enforce server-side authorization for every object read and mutation, scoped by the authenticated user and tenant."
+    },
+    {
+      "id": "DEMO-02",
+      "title": "Insufficient Security Event Context",
+      "severity": "Medium",
+      "cvss": 5.3,
+      "cwe": "CWE-778",
+      "description": "The fictional service records failed requests without enough principal, object and correlation context for reliable investigation.",
+      "impact": "Suspicious access patterns may be difficult to investigate or correlate.",
+      "remediation": "Log authenticated principal, object, action, policy decision and correlation ID while protecting sensitive values."
+    },
+    {
+      "id": "DEMO-03",
+      "title": "Missing Defensive Response Headers",
+      "severity": "Low",
+      "cvss": 3.7,
+      "cwe": "CWE-693",
+      "description": "The fictional web service does not consistently return baseline browser security headers.",
+      "impact": "Browser-side protections are weaker than necessary for a production deployment.",
+      "remediation": "Define and test a suitable Content-Security-Policy, Strict-Transport-Security and X-Content-Type-Options policy."
+    }
+  ]
+}

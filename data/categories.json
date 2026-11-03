@@ -1,0 +1,92 @@
+[
+  {
+    "id": "active-directory",
+    "name": "Active Directory & Windows Pentesting",
+    "name_si": "Active Directory සහ Windows ආරක්ෂණ පරීක්ෂාව",
+    "icon": "🛡️",
+    "color": "#00f3ff",
+    "description": "Enterprise Windows domain architecture, Kerberos authentication, ticket attacks, lateral movement, BloodHound mapping, and credential extraction.",
+    "description_si": "ව්‍යාපාරික Windows Domain ව්‍යුහය, Kerberos සහ NTLM අනන්‍යතාව තහවුරු කිරීම, AS-REP Roasting, Pass-the-Hash, BloodHound විශ්ලේෂණය සහ Privilege Escalation."
+  },
+  {
+    "id": "web-security",
+    "name": "Web Application Security (OWASP Top 10)",
+    "name_si": "වෙබ් යෙදුම් ආරක්ෂාව (OWASP Top 10)",
+    "icon": "🌐",
+    "color": "#00ff88",
+    "description": "Deep-dive into modern web vulnerabilities: SQLi, NoSQLi, LDAPi, XXE, XSS, CSRF, SSRF, SSTI, Insecure Deserialization, and Race Conditions.",
+    "description_si": "වෙබ් අඩවි සහ යෙදුම් වල ප්‍රධාන දුර්වලතා: SQL Injection, NoSQL, LDAP, XXE, XSS, CSRF, SSRF, SSTI, Insecure Deserialization සහ Race Conditions ප්‍රායෝගිකව ඉගෙනීම."
+  },
+  {
+    "id": "http-attacks",
+    "name": "HTTP Protocols & Smuggling Techniques",
+    "name_si": "HTTP ප්‍රොටෝකෝල සහ Smuggling ප්‍රහාර",
+    "icon": "⚡",
+    "color": "#ffaa00",
+    "description": "HTTP Keep-Alive, HTTP/1.1 Request Smuggling (CL.TE / TE.CL), HTTP/2 Smuggling, WebSocket Desync, and Same-Origin Policy (SOP).",
+    "description_si": "HTTP/1.1 සහ HTTP/2 දත්ත හුවමාරු ක්‍රම, Request Smuggling, Keep-Alive/Pipelining ගැටළු, WebSocket Smuggling සහ Same-Origin Policy (SOP)."
+  },
+  {
+    "id": "api-auth",
+    "name": "API & Token Security (JWT & OAuth 2.0)",
+    "name_si": "API, JWT සහ OAuth 2.0 ආරක්ෂාව",
+    "icon": "🔑",
+    "color": "#bd00ff",
+    "description": "JSON Web Token (JWT) pentesting, algorithm confusion (alg:none, RS256 to HS256), OAuth 2.0 grant types, and redirect URI manipulation.",
+    "description_si": "API සහ Token ආරක්ෂාව, JWT දුර්වලතා (alg:none, Secret Cracking, Key Confusion), OAuth 2.0 ක්‍රමෝපායන් සහ Account Takeover ප්‍රහාර."
+  },
+  {
+    "id": "code-review",
+    "name": "Secure Source Code Auditing",
+    "name_si": "කේත සමාලෝචනය (Source Code Auditing)",
+    "icon": "💻",
+    "color": "#ff0055",
+    "description": "White-box security auditing for PHP (type juggling, sink analysis), Flask/Python (SSTI, Werkzeug console PIN exploit), and JavaScript Prototype Pollution.",
+    "description_si": "ප්‍රභව කේත පරීක්ෂාව (Code Review): PHP Type Juggling, අනතුරුදායක Sinks, Flask/Python SSTI සහ JavaScript Prototype Pollution ප්‍රහාර."
+  },
+  {
+    "id": "linux-privesc",
+    "name": "Linux Privilege Escalation",
+    "name_si": "Linux Privilege Escalation (Root ලබාගැනීම)",
+    "icon": "🐧",
+    "color": "#39ff14",
+    "description": "Sudo permissions abuse, GTFOBins exploitation, automated enumeration with LinPEAS, SUID binaries, cron jobs, and capabilities.",
+    "description_si": "Linux මෙහෙයුම් පද්ධතියේ සාමාන්‍ය පරිශීලකයෙකුගෙන් Root තත්වයට බලතල වැඩි කරගැනීම: Sudo Abuse, GTFOBins, LinPEAS, SUID සහ Cron Jobs."
+  },
+  {
+    "id": "network-shells",
+    "name": "Reconnaissance, Shells & Metasploit",
+    "name_si": "ජාල ගවේෂණය, Shells සහ Metasploit",
+    "icon": "🎯",
+    "color": "#00d4ff",
+    "description": "Burp Suite masterclass, pentest methodology, fuzzing wordlists, reverse & bind shells, Metasploit Framework, Meterpreter payloads, Msfvenom, and Wi-Fi security.",
+    "description_si": "Burp Suite භාවිතය, Fuzzing සහ Wordlists, Reverse Shells, Metasploit Framework, Msfvenom Payloads, Vulnerability Databases සහ Wi-Fi 802.11 ආරක්ෂාව."
+  },
+  {
+    "id": "soc-defensive",
+    "name": "Defensive Security, SOC & Cloud",
+    "name_si": "ආරක්ෂණ තාක්ෂණය, SOC සහ Cloud Security",
+    "icon": "🏢",
+    "color": "#00b4d8",
+    "description": "Security Operations Center (SOC) workflows, SIEM/EDR, Threat Modeling (STRIDE/PASTA), Cloud security (AWS/Azure/GCP IAM, S3, IMDS), and DevSecOps pipelines.",
+    "description_si": "ආරක්ෂක මෙහෙයුම් මධ්‍යස්ථාන (SOC) කාර්යභාරය, SIEM/EDR, Threat Modeling (STRIDE, PASTA), Cloud Security (AWS/Azure/GCP) සහ DevSecOps ක්‍රමවේද."
+  },
+  {
+    "id": "red-team-emerging",
+    "name": "Red Teaming, LLM & Mobile Security",
+    "name_si": "Red Teaming, AI/LLM Pentesting සහ Mobile",
+    "icon": "🤖",
+    "color": "#ff3864",
+    "description": "Red Team operations, MITRE ATT&CK matrix, LLM prompt injection and jailbreaking, and Android/iOS mobile application reverse engineering.",
+    "description_si": "Red Team ප්‍රහාරක උපායමාර්ග, Large Language Models (LLM) Pentesting, Prompt Injection, සහ Mobile Applications (Android APK) ආරක්ෂණ පරීක්ෂාව."
+  },
+  {
+    "id": "machines-reports",
+    "name": "Machine Walkthroughs, Exploits & Reports",
+    "name_si": "ප්‍රායෝගික Machines, Exploits සහ Pentest Reports",
+    "icon": "🏆",
+    "color": "#ffc107",
+    "description": "Full walkthroughs for TryHackMe machines (Orion, Abducted, Nexus), Python exploit scripts (mfaexploit.py), and professional security assessment reports.",
+    "description_si": "TryHackMe Machines පියවරෙන් පියවර විසඳුම් (Orion, Abducted, Nexus), Python Exploit Scripts (mfaexploit.py) සහ සත්‍ය Penetration Testing Reports."
+  }
+]

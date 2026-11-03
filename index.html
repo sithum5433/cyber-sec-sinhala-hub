@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBER-SEC SINHALA HUB | TryHackMe Pentesting Knowledge Base</title>
+  <meta name="description" content="Comprehensive Cybersecurity, Ethical Hacking, and TryHackMe Pentesting Knowledge Base in Sinhala and English by Sithum404.">
+  
+  <!-- Favicon / Icons -->
+  <link rel="icon" href="assets/images/6ec54c8737fc352be9d76c30fc3762de.png" type="image/png">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to learning content</a>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-logo"><i data-lucide="shield-check"></i></div>
+        <div class="brand-text">
+          <h1>
+            CYBER-SEC HUB
+            <span class="brand-badge">THM PRO</span>
+          </h1>
+          <p>සිංහල + English Pentesting Knowledge Portal</p>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-wrapper">
+        <span class="search-icon"><i data-lucide="search"></i></span>
+        <input 
+          type="text" 
+          id="global-search" 
+          class="search-input" 
+          placeholder="Search modules, payloads, CVEs, or concepts (සිංහලෙන් හෝ English)..."
+          autocomplete="off"
+        >
+      </div>
+
+      <!-- Controls -->
+      <div class="header-controls">
+        <button id="mobile-menu-toggle" class="icon-btn mobile-menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <!-- Language Switcher -->
+        <div class="lang-selector">
+          <button class="lang-btn active" data-lang="dual" title="Side-by-side Sinhala & English">
+            <span><i data-lucide="languages"></i></span> Dual
+          </button>
+          <button class="lang-btn" data-lang="si" title="Sinhala In-Depth Focus">
+            <span><i data-lucide="book-open"></i></span> සිංහල
+          </button>
+          <button class="lang-btn" data-lang="en" title="English Theory & Cheat Sheet">
+            <span><i data-lucide="file-text"></i></span> English
+          </button>
+        </div>
+
+        <a href="#/cheatsheets" class="nav-link-btn" title="Quick Terminal Payloads">
+          <span><i data-lucide="zap"></i></span> Payloads
+        </a>
+        <a href="#/walkthroughs" class="nav-link-btn" title="Machine Walkthroughs">
+          <span><i data-lucide="trophy"></i></span> Walkthroughs
+        </a>
+        <a href="#/report" class="nav-link-btn" title="Security Assessment Report">
+          <span><i data-lucide="clipboard-check"></i></span> Assessment
+        </a>
+        <a href="#/mfa-exploit" class="nav-link-btn" title="MFA Exploit Studio">
+          <span><i data-lucide="square-terminal"></i></span> Exploit Lab
+        </a>
+        <button id="focus-search-btn" class="icon-btn" title="Focus search (Ctrl+K)">⌘K</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="app-container">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Author Profile Card -->
+      <div class="sidebar-card">
+        <div class="author-box">
+          <img src="assets/images/6ec54c8737fc352be9d76c30fc3762de.png" alt="Sithum404" class="author-avatar" onerror="this.src='assets/images/Sithum404.png'">
+          <div class="author-info">
+            <h4>Sithum Sanjana</h4>
+            <p><span>●</span> THM Pentesting Certified</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Learning Statistics -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">
+          <span>Training Progress</span>
+          <span style="color:var(--accent-cyan); font-size:0.75rem;">LIVE</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-number" id="stat-modules-count">0</div>
+            <div class="stat-label">Modules</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number" id="stat-tasks-count">0</div>
+            <div class="stat-label">Tasks & Topics</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number" id="stat-completed-count">0</div>
+            <div class="stat-label">Completed</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number" style="color:var(--accent-green);">100%</div>
+            <div class="stat-label">Bilingual</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories Navigation -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">
+          <span>Knowledge Tracks</span>
+        </div>
+        <div class="category-list" id="sidebar-categories">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Quick Links & Tools -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">
+          <span>Dedicated Portals</span>
+        </div>
+        <div class="quick-tools-list">
+          <a href="#/cheatsheets" class="tool-link">
+            <span><i data-lucide="zap"></i></span>
+            <div>
+              <strong>Payloads & Cheat Sheet</strong>
+              <div style="font-size:0.7rem; color:var(--text-muted);">Quick-copy reverse shells & exploits</div>
+            </div>
+          </a>
+          <a href="#/walkthroughs" class="tool-link">
+            <span><i data-lucide="trophy"></i></span>
+            <div>
+              <strong>THM Machines Lab</strong>
+              <div style="font-size:0.7rem; color:var(--text-muted);">Orion, Abducted, Nexus writeups</div>
+            </div>
+          </a>
+          <a href="#/report" class="tool-link">
+            <span><i data-lucide="clipboard-check"></i></span>
+            <div>
+              <strong>Security Assessment Report</strong>
+              <div style="font-size:0.7rem; color:var(--text-muted);">Public demonstration report</div>
+            </div>
+          </a>
+          <a href="#/mfa-exploit" class="tool-link">
+            <span><i data-lucide="square-terminal"></i></span>
+            <div>
+              <strong>MFA Exploit Studio</strong>
+              <div style="font-size:0.7rem; color:var(--text-muted);">mfaexploit.py Race Condition Bypass</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <section class="content-area" id="main-content">
+      <!-- Populated dynamically by app.js -->
+    </section>
+
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-cert">
+        <span>🎖️</span> TryHackMe Certified: Web Application Pentesting (36h 53m) • L.G Sithum Sanjana
+      </div>
+      <p class="footer-text">
+        Cybersecurity Educational Knowledge Base • Sinhala & English Unified Pentesting Hub.
+        Theory, Practical Exploitation, Payloads & Defensive Hardening.
+      </p>
+      <p style="font-size:0.7rem; color:var(--text-muted);">
+        All TryHackMe tasks and walkthroughs synthesized, prompt-cleaned, and enriched for security researchers.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Application Script -->
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

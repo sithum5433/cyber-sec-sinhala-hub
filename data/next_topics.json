@@ -1,0 +1,316 @@
+[
+  {
+    "id": "api-authorization-bola",
+    "filename": "Curated API Authorization and BOLA Lab",
+    "title": "API Authorization & BOLA (IDOR)",
+    "title_si": "API Authorization සහ BOLA (IDOR) ප්‍රායෝගික පාඩම",
+    "category": "api-auth",
+    "difficulty": "Intermediate",
+    "mitre_attack": "T1190 (Exploit Public-Facing Application)",
+    "cwe": "CWE-639 (Authorization Bypass Through User-Controlled Key)",
+    "tags": ["API Security", "BOLA", "IDOR", "REST", "Authorization", "Burp Suite"],
+    "tasks_count": 3,
+    "curated": true,
+    "accuracy_note": "Aligned with OWASP API Security Top 10 2023 API1: Broken Object Level Authorization. Test only accounts and endpoints you are authorized to assess.",
+    "summary_si": "Object ID එක වෙනස් කිරීමෙන් වෙනත් user කෙනෙකුගේ resource එකකට access ලැබෙනවාද කියා authorization boundary එක පරීක්ෂා කරන පාඩම.",
+    "summary_en": "A practical, safe workflow for testing object-level authorization without confusing authentication with authorization.",
+    "tasks": [
+      {
+        "task_num": 1,
+        "task_title": "Authentication is not Authorization",
+        "sinhala_content": "Login වීමෙන් user කෙනා කවුද කියන එක තහවුරු වෙනවා. නමුත් request එකේ object එකට එම user ට permission තියෙනවාද කියන එක server-side check එකක්. Client එකෙන් එන user_id හෝ object_id එක trust කරන්න එපා.",
+        "english_summary": "Authentication identifies the caller; authorization decides whether that caller may access this specific object. Enforce the decision on the server for every request.",
+        "code_examples": ["curl -i -H 'Authorization: Bearer <LAB_TOKEN>' https://lab.example.test/api/users/me/orders/1001"],
+        "qa": [{"question": "Where must object authorization be enforced?", "answer": "On the server, for every object access, using the authenticated principal and the requested object's ownership or policy."}]
+      },
+      {
+        "task_num": 2,
+        "task_title": "Compare Same-Role Object Access",
+        "sinhala_content": "ඔයාගේම lab accounts දෙකක් භාවිතා කරලා Account A ගේ object ID එක Account B token එකෙන් request කරන්න. Status code එක විතරක් නොව response body, timing, side effects සහ audit log එකත් compare කරන්න.",
+        "english_summary": "Use two authorized test accounts. Replay an otherwise identical request with the second account's token and verify that the server returns a consistent denial without leaking metadata.",
+        "code_examples": ["curl -i -H 'Authorization: Bearer <ACCOUNT_B_TOKEN>' https://lab.example.test/api/orders/1001"],
+        "qa": [{"question": "What is a reliable negative test?", "answer": "A valid authenticated user attempting to access another test user's object must receive a policy-consistent denial and no sensitive data."}]
+      },
+      {
+        "task_num": 3,
+        "task_title": "Remediation and Regression Tests",
+        "sinhala_content": "Resource lookup එක user context එකට bind කරන්න. UUID භාවිතා කිරීම පමණක් fix එකක් නොවේ. Ownership, tenant boundary, role policy සහ audit logging එකට test cases ලියන්න.",
+        "english_summary": "Use policy-aware queries such as retrieving an object by both object_id and authenticated owner/tenant. Add authorization tests for read, update, delete, bulk and nested resources.",
+        "code_examples": ["SELECT id FROM orders WHERE id = ? AND owner_id = ?;"],
+        "qa": [{"question": "Why is changing numeric IDs to UUIDs not a complete fix?", "answer": "UUIDs reduce guessing but do not enforce authorization; a leaked or supplied UUID is still usable if the server does not check ownership."}]
+      }
+    ],
+    "blue_team_defense": {
+      "remediation": "Centralize authorization policies, derive identity from the validated session/token, scope database queries by tenant and owner, and deny by default.",
+      "detection": "Log principal, object, action, policy decision and correlation ID. Alert on repeated cross-tenant denials or unusual sequential object access.",
+      "checklist": ["Test read/write/delete authorization", "Cover nested and bulk endpoints", "Avoid sensitive data in error responses", "Add authorization regression tests"]
+    }
+  },
+  {
+    "id": "cloud-iam-and-metadata-security",
+    "filename": "Curated Cloud IAM and Metadata Security Lab",
+    "title": "Cloud IAM, Metadata & Least Privilege",
+    "title_si": "Cloud IAM, Metadata සහ Least Privilege ආරක්ෂාව",
+    "category": "soc-defensive",
+    "difficulty": "Intermediate",
+    "mitre_attack": "T1078.004 (Valid Accounts: Cloud Accounts), T1552.005 (Cloud Instance Metadata API)",
+    "cwe": "CWE-269 (Improper Privilege Management)",
+    "tags": ["AWS IAM", "Azure Managed Identity", "GCP IAM", "IMDSv2", "Least Privilege", "Cloud Security"],
+    "tasks_count": 3,
+    "curated": true,
+    "accuracy_note": "Provider-neutral concepts with AWS examples. Use a disposable cloud account and never query metadata on systems you do not own.",
+    "summary_si": "Cloud identity permissions, short-lived credentials සහ instance metadata exposure අවදානම් නිවැරදිව model කරන පාඩම.",
+    "summary_en": "Understand cloud identity boundaries, temporary credentials, metadata protections and practical least-privilege review.",
+    "tasks": [
+      {
+        "task_num": 1,
+        "task_title": "Inventory Effective Permissions",
+        "sinhala_content": "User එකට attach කරපු policy එක පමණක් නොව group, role assumption, resource policy සහ session policy එකතුවෙන් effective permission එක හැදෙනවා.",
+        "english_summary": "Review identity policies, groups, trust policies, resource policies and permission boundaries together. A narrowly named policy can still produce broad effective access through role chaining.",
+        "code_examples": ["aws sts get-caller-identity", "aws iam list-attached-user-policies --user-name <LAB_USER>"],
+        "qa": [{"question": "What does least privilege mean in IAM?", "answer": "Grant only the actions, resources and conditions required for the workload, for the shortest practical duration."}]
+      },
+      {
+        "task_num": 2,
+        "task_title": "Metadata Service Safety",
+        "sinhala_content": "Metadata endpoint එකෙන් temporary role credentials leak වුණොත් instance compromise එක cloud compromise එකක් වෙන්න පුළුවන්. SSRF defenses සමඟ provider metadata hardening එකත් අවශ්‍යයි.",
+        "english_summary": "Treat instance metadata as a privileged local boundary. Use IMDSv2 where available, restrict egress, block SSRF primitives and avoid long-lived keys on instances.",
+        "code_examples": ["aws ec2 modify-instance-metadata-options --instance-id <LAB_INSTANCE> --http-tokens required --http-endpoint enabled"],
+        "qa": [{"question": "Does IMDSv2 alone fix SSRF?", "answer": "No. It raises the bar, but applications still need SSRF defenses, egress controls and minimal instance-role permissions."}]
+      },
+      {
+        "task_num": 3,
+        "task_title": "Cloud Detection Baseline",
+        "sinhala_content": "CloudTrail, GuardDuty සහ identity provider logs එකතු කරලා unusual AssumeRole, access-key creation, region changes සහ policy changes monitor කරන්න.",
+        "english_summary": "Monitor policy mutations, new access keys, unusual AssumeRole chains, disabled logging and access from unexpected geographies or workloads.",
+        "code_examples": ["aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=PutRolePolicy"],
+        "qa": [{"question": "Which events deserve high priority?", "answer": "Logging changes, privilege policy changes, new credentials and role assumptions from unexpected principals or locations."}]
+      }
+    ],
+    "blue_team_defense": {
+      "remediation": "Use federation and short-lived credentials, permission boundaries, explicit resource scopes, deny-by-default conditions and separate production roles.",
+      "detection": "Centralize CloudTrail or equivalent audit logs. Alert on IAM policy changes, key creation, unusual role assumptions and metadata-related application errors.",
+      "checklist": ["Require MFA for privileged actions", "Use IMDSv2 where supported", "Remove unused keys and roles", "Test cross-account trust policies"]
+    }
+  },
+  {
+    "id": "dfir-windows-initial-triage",
+    "filename": "Curated Windows DFIR Initial Triage Lab",
+    "title": "DFIR: Windows Initial Triage",
+    "title_si": "DFIR: Windows Initial Triage සහ Evidence Handling",
+    "category": "soc-defensive",
+    "difficulty": "Intermediate",
+    "mitre_attack": "T1059.001 (PowerShell), T1003 (OS Credential Dumping)",
+    "cwe": "CWE-778 (Insufficient Logging)",
+    "tags": ["DFIR", "SOC", "Windows Event Logs", "Sysmon", "Timeline", "Evidence"],
+    "tasks_count": 3,
+    "curated": true,
+    "accuracy_note": "For isolated lab images or approved incident response. Preserve originals and document chain of custody.",
+    "summary_si": "Incident එකක් confirm කිරීමට පෙර volatile evidence, event logs, persistence points සහ user activity systematic ලෙස triage කරන workflow එක.",
+    "summary_en": "A repeatable first-response workflow that preserves evidence, establishes scope and avoids contaminating the host.",
+    "tasks": [
+      {
+        "task_num": 1,
+        "task_title": "Preserve Before Investigating",
+        "sinhala_content": "මුලින් system owner, time zone, host ID සහ evidence hash record කරන්න. Original files මත analysis නොකර working copy භාවිතා කරන්න.",
+        "english_summary": "Record scope, timestamps, system identity and acquisition details. Hash collected artifacts and maintain a documented chain of custody.",
+        "code_examples": ["Get-Date; hostname; whoami", "Get-FileHash .\\evidence\\Security.evtx -Algorithm SHA256"],
+        "qa": [{"question": "Why hash evidence?", "answer": "To demonstrate that the collected artifact was not altered between acquisition and analysis."}]
+      },
+      {
+        "task_num": 2,
+        "task_title": "Triage Logs and Persistence",
+        "sinhala_content": "4624/4625 logons, 4688 process creation, 7045 service installation, PowerShell logs සහ scheduled tasks timeline එකක් විදිහට correlate කරන්න.",
+        "english_summary": "Correlate authentication, process creation, service installation, PowerShell and scheduled-task telemetry rather than treating one event as proof.",
+        "code_examples": ["Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4624,4625,4688} -MaxEvents 50", "Get-ScheduledTask | Where-Object {$_.TaskPath -notlike '\\\\Microsoft*'}"],
+        "qa": [{"question": "Why correlate multiple event sources?", "answer": "Individual events are ambiguous; time-correlated evidence provides stronger context and reduces false positives."}]
+      },
+      {
+        "task_num": 3,
+        "task_title": "Scope and Containment Notes",
+        "sinhala_content": "Affected account, hosts, first-seen time, persistence mechanism සහ impacted data record කරලා containment action එක approval එක්ක කරන්න.",
+        "english_summary": "Document affected identities, hosts, first-seen time, persistence and business impact. Separate containment from eradication and recovery decisions.",
+        "code_examples": ["wevtutil epl Security C:\\IR\\Security.evtx", "wevtutil epl Microsoft-Windows-PowerShell/Operational C:\\IR\\PowerShell-Operational.evtx"],
+        "qa": [{"question": "What should an initial triage report answer?", "answer": "What happened, when it started, which identities/hosts are involved, what evidence supports it and what remains unknown."}]
+      }
+    ],
+    "blue_team_defense": {
+      "remediation": "Enable centralized logging, PowerShell Script Block Logging, process creation telemetry and time synchronization. Restrict log access and retain logs immutably.",
+      "detection": "Correlate 4624/4625, 4688, 7045, PowerShell 4104 and Sysmon process/network events with a common timeline.",
+      "checklist": ["Synchronize time sources", "Collect logs centrally", "Hash acquired artifacts", "Document chain of custody"]
+    }
+  },
+  {
+    "id": "kerberoasting-defensive-lab",
+    "filename": "Curated Kerberoasting Lab",
+    "title": "Kerberoasting: Attack Mechanics & Defense",
+    "title_si": "Kerberoasting: ප්‍රහාර යාන්ත්‍රණය සහ ආරක්ෂාව",
+    "category": "active-directory",
+    "difficulty": "Intermediate",
+    "mitre_attack": "T1558.003 (Steal or Forge Kerberos Tickets: Kerberoasting)",
+    "cwe": "CWE-522 (Insufficiently Protected Credentials)",
+    "tags": ["Kerberos", "TGS", "SPN", "Kerberoasting", "Service Accounts", "Hashcat"],
+    "tasks_count": 3,
+    "curated": true,
+    "accuracy_note": "Use only in an authorized AD lab. Kerberoasting requests a service ticket; it does not directly dump a plaintext password.",
+    "summary_si": "SPN තියෙන service account එකකට TGS request කරලා ticket encryption material offline crack කිරීමට ඇති risk එක සහ defense.",
+    "summary_en": "Learn what a service ticket exposes, why weak service-account passwords matter and how to reduce the attack surface.",
+    "tasks": [
+      {
+        "task_num": 1,
+        "task_title": "SPNs and Service Tickets",
+        "sinhala_content": "SPN එක service instance එකක් AD තුළ identify කරන නමක්. Authenticated domain user කෙනෙකුට service ticket request කරන්න පුළුවන්. Ticket material offline analysis කළත් password එක weak නම් risk එකක්.",
+        "english_summary": "An SPN maps a service instance to an account. A domain principal can request a TGS for it; the encrypted ticket can be assessed offline, making password strength critical.",
+        "code_examples": ["setspn -Q */* -F", "Get-ADUser -LDAPFilter '(servicePrincipalName=*)' -Properties servicePrincipalName"],
+        "qa": [{"question": "What is the key prerequisite?", "answer": "A service account with an SPN and a password that is weak enough to be recovered through offline guessing."}]
+      },
+      {
+        "task_num": 2,
+        "task_title": "Authorized Lab Enumeration",
+        "sinhala_content": "Lab එකේ scope එක confirm කරලා SPN accounts, encryption types, password age සහ privilege relationships review කරන්න. High privilege service accounts priority කරන්න.",
+        "english_summary": "Prioritize accounts with SPNs, high privileges, stale passwords or legacy encryption. Enumeration alone does not prove compromise.",
+        "code_examples": ["Get-ADUser -Filter {ServicePrincipalName -like '*'} -Properties ServicePrincipalName,PasswordLastSet,Enabled"],
+        "qa": [{"question": "Does every SPN account imply a vulnerability?", "answer": "No. The risk depends on password strength, account privilege, encryption configuration and monitoring."}]
+      },
+      {
+        "task_num": 3,
+        "task_title": "Hardening and Detection",
+        "sinhala_content": "gMSA භාවිතා කරන්න, long random passwords දාන්න, unnecessary SPNs remove කරන්න, privileged users service accounts විදිහට භාවිතා නොකරන්න.",
+        "english_summary": "Prefer gMSAs, long random secrets, AES encryption and least privilege. Monitor unusual TGS request volume and service-account usage.",
+        "code_examples": ["Get-ADServiceAccount -Filter * -Properties PrincipalsAllowedToRetrieveManagedPassword"],
+        "qa": [{"question": "What is a strong mitigation?", "answer": "Use gMSAs or long random rotated passwords for service accounts and remove unnecessary privilege."}]
+      }
+    ],
+    "blue_team_defense": {
+      "remediation": "Use gMSAs, remove unused SPNs, enforce long random service-account secrets, AES Kerberos and least privilege.",
+      "detection": "Baseline TGS requests and alert on bursts, unusual client hosts, legacy encryption and service-account logons from workstations.",
+      "checklist": ["Inventory SPNs", "Migrate eligible accounts to gMSA", "Remove Domain Admin from service accounts", "Review Event ID 4769"]
+    }
+  },
+  {
+    "id": "bug-bounty-recon-methodology",
+    "filename": "Curated Bug Bounty Recon Methodology",
+    "title": "Bug Bounty Recon & Responsible Testing",
+    "title_si": "Bug Bounty Recon සහ වගකීම් සහිත පරීක්ෂණ ක්‍රමය",
+    "category": "network-shells",
+    "difficulty": "Beginner",
+    "mitre_attack": "T1595 (Active Scanning), T1592 (Gather Victim Host Information)",
+    "cwe": "CWE-200 (Exposure of Sensitive Information)",
+    "tags": ["Bug Bounty", "Recon", "Asset Discovery", "Scope", "Nuclei", "httpx", "ffuf", "Reporting"],
+    "tools_and_technology": ["Burp Suite Community", "OWASP ZAP", "subfinder", "amass", "httpx", "ffuf", "Nuclei", "jq", "curl", "dig"],
+    "tasks_count": 3,
+    "curated": true,
+    "accuracy_note": "Only test targets explicitly listed in a current program scope. Respect rate limits, privacy rules, safe-harbor language and stop conditions.",
+    "summary_si": "Scope-first asset discovery, low-impact validation සහ reproducible report එකක් හදන bug bounty workflow එක.",
+    "summary_en": "A scope-first methodology for discovering assets, validating impact safely and writing reproducible reports.",
+    "tasks": [
+      {
+        "task_num": 1,
+        "task_title": "Scope and Rules First",
+        "sinhala_content": "Program scope, excluded assets, rate limits, prohibited actions සහ disclosure rules කියවලා local notes එකක් හදන්න. Scope එක unclear නම් test නොකර program owner ගෙන් අහන්න.",
+        "english_summary": "Read the current policy before touching an asset. Record in-scope domains, exclusions, rate limits, prohibited actions, data-handling rules and reporting channels.",
+        "code_examples": ["printf '%s\\n' 'IN-SCOPE: example.test' 'RATE: 1 req/sec' 'NO: destructive testing' > scope.txt"],
+        "qa": [{"question": "What is the first recon tool?", "answer": "The program policy and scope document; technical scanning comes after authorization is clear."}]
+      },
+      {
+        "task_num": 2,
+        "task_title": "Low-Impact Asset Discovery",
+        "sinhala_content": "Passive sources සහ permitted DNS queries වලින් assets collect කරලා live hosts manually verify කරන්න. Production systems මත aggressive scanning avoid කරන්න.",
+        "english_summary": "Start with passive discovery and permitted DNS checks. Deduplicate assets, label confidence and avoid high-volume scans unless the policy explicitly allows them.",
+        "code_examples": ["dig +short A app.example.test", "curl -sS -I --max-time 10 https://app.example.test"],
+        "qa": [{"question": "Why label asset confidence?", "answer": "It separates confirmed in-scope assets from passive leads and prevents accidental testing of unrelated infrastructure."}]
+      },
+      {
+        "task_num": 3,
+        "task_title": "Validate and Report Safely",
+        "sinhala_content": "Impact prove කිරීමට minimum evidence එකක් පමණක් collect කරන්න. Real user data access නොකර redact කළ screenshots, request/response, steps සහ remediation දෙන්න.",
+        "english_summary": "Use the smallest non-destructive proof. Include reproducible steps, expected versus actual behavior, impact, affected asset, timestamps, redacted evidence and remediation.",
+        "code_examples": ["curl -sS -D response-headers.txt -o response-body.txt https://app.example.test/health"],
+        "qa": [{"question": "What makes a report actionable?", "answer": "Clear reproduction steps, scope, impact, safe evidence, severity rationale and a concrete remediation suggestion."}]
+      },
+      {
+        "task_num": 4,
+        "task_title": "Authorized Automation Pipeline",
+        "sinhala_content": "Scope file එකේ තියෙන domains පමණක් passive discovery, HTTP probing සහ low-rate content discovery සඳහා pipeline කරන්න. Tool එකකට rate limit දාන්න, output එක deduplicate කරලා manually verify කරන්න.",
+        "english_summary": "A safe pipeline is: scope validation, passive enumeration, HTTP probing, low-rate discovery, manual verification and reporting. Automation produces leads, not proof.",
+        "code_examples": [
+          "subfinder -d example.test -silent -o subs.txt",
+          "httpx -l subs.txt -silent -rate-limit 2 -o live.txt",
+          "ffuf -u https://app.example.test/FUZZ -w /path/to/allowed-wordlist.txt -rate 2 -mc 200,204,301,302 -of json -o ffuf.json",
+          "nuclei -l live.txt -severity low,medium -rl 2 -c 1 -o nuclei-findings.txt"
+        ],
+        "qa": [{"question": "Why use low rate limits and manual verification?", "answer": "To reduce service impact, respect program rules and eliminate scanner false positives before reporting."}]
+      }
+    ],
+    "blue_team_defense": {
+      "remediation": "Maintain an asset inventory, remove forgotten services, enforce authentication and publish a clear vulnerability disclosure policy.",
+      "detection": "Monitor unusual enumeration, rate-limit abuse and repeated probing while preserving researcher-friendly response and safe-harbor processes.",
+      "checklist": ["Maintain current asset inventory", "Define safe testing rules", "Redact sensitive evidence", "Track remediation to closure"]
+    }
+  },
+  {
+    "id": "rust-security-engineering",
+    "filename": "Rust for Security Engineering",
+    "title": "Rust for Ethical Hacking & Defense",
+    "title_si": "Ethical Hacking සහ Defense සඳහා Rust භාවිතය",
+    "category": "code-review",
+    "difficulty": "Intermediate",
+    "mitre_attack": "T1587.001 (Develop Capabilities: Malware), T1059 (Command and Scripting Interpreter)",
+    "cwe": "CWE-787 (Out-of-Bounds Write), CWE-134 (Use of Externally-Controlled Format String)",
+    "tags": ["Rust", "Cargo", "Tokio", "Reqwest", "Clap", "Security Tools", "Memory Safety", "Defensive Automation"],
+    "tasks_count": 4,
+    "curated": true,
+    "accuracy_note": "Use these examples against localhost, a disposable lab, or explicitly authorized targets. Rust memory safety does not make network tools automatically safe.",
+    "tools_and_technology": ["rustup", "cargo", "clippy", "rustfmt", "Tokio", "reqwest", "clap", "serde", "sha2", "cargo-audit"],
+    "summary_si": "Rust භාවිතයෙන් fast, portable සහ memory-safe security utilities—authorized reconnaissance, log analysis, hashing සහ defensive automation—හදන ක්‍රමය.",
+    "summary_en": "Build fast, portable and memory-safe security utilities in Rust for authorized reconnaissance, defensive automation, log analysis and evidence handling.",
+    "tasks": [
+      {
+        "task_num": 1,
+        "task_title": "Install and Secure a Rust Workspace",
+        "sinhala_content": "rustup install කරලා cargo project එකක් හදන්න. `cargo fmt`, `cargo clippy` සහ `cargo audit` CI එකට දාන්න. Rust memory-safe වුණත් dependency, authorization සහ output handling තවමත් developer responsibility එකක්.",
+        "english_summary": "Install Rust with rustup, initialize a Cargo project and enforce formatting, linting and dependency auditing. Memory safety does not eliminate logic, authorization or supply-chain risks.",
+        "code_examples": ["rustup toolchain install stable", "cargo new sec-tool && cd sec-tool", "cargo fmt --check && cargo clippy -- -D warnings", "cargo install cargo-audit && cargo audit"],
+        "qa": [{"question": "Does Rust make an offensive tool safe by default?", "answer": "No. Rust reduces many memory-safety bugs, but scope, authorization, dependency risk and operational impact still require controls."}]
+      },
+      {
+        "task_num": 2,
+        "task_title": "Authorized HTTP Header Auditor",
+        "sinhala_content": "Public web response එකේ security headers check කරන defensive utility එකක් හදන්න. Target එක command-line argument එකෙන් ගන්න, HTTPS certificate validation disable නොකරන්න, timeout එකක් දාන්න.",
+        "english_summary": "Use Rust and reqwest to inspect headers on an authorized URL. Keep TLS verification enabled, set a timeout and report missing defensive headers without exploiting the target.",
+        "code_examples": [
+          "cargo add reqwest --features rustls-tls && cargo add tokio --features macros,rt-multi-thread",
+          "use reqwest::Client; #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> { let url = std::env::args().nth(1).expect(\"usage: header-audit <URL>\"); let response = Client::builder().timeout(std::time::Duration::from_secs(10)).build()?.get(url).send().await?; for name in [\"content-security-policy\", \"strict-transport-security\", \"x-content-type-options\"] { println!(\"{}: {}\", name, response.headers().get(name).map(|v| v.to_str().unwrap_or(\"<invalid>\")).unwrap_or(\"MISSING\")); } Ok(()) }"
+        ],
+        "qa": [{"question": "Why should TLS verification remain enabled?", "answer": "Disabling verification hides certificate problems and makes the tool unsafe to use as a trustworthy defensive auditor."}]
+      },
+      {
+        "task_num": 3,
+        "task_title": "Defensive Log Scanner",
+        "sinhala_content": "Large web logs line-by-line stream කරලා repeated 401/403 spikes, suspicious path patterns සහ source IP counts identify කරන්න. File එක memory එකට සම්පූර්ණයෙන් load නොකර bounded parsing භාවිතා කරන්න.",
+        "english_summary": "Rust is useful for fast, low-memory log processing. Parse line by line, normalize input, avoid logging secrets and emit aggregate indicators for analyst review.",
+        "code_examples": [
+          "cargo add clap --features derive && cargo add regex",
+          "rg -n ' 401 | 403 |/admin|/wp-login|\\.env' ./logs/ --glob '*.log'"
+        ],
+        "qa": [{"question": "What is the defensive value of streaming logs?", "answer": "It handles large files with bounded memory and supports near-real-time detection without retaining unnecessary sensitive content."}]
+      },
+      {
+        "task_num": 4,
+        "task_title": "Safe Port Inventory in a Lab",
+        "sinhala_content": "ඔයාගේම localhost හෝ lab host එකක service inventory එකක් build කරන්න. Port range, concurrency සහ timeout explicit කරන්න. Internet-wide scanning හෝ stealth features මේ educational utility එකට දාන්න එපා.",
+        "english_summary": "For a lab-only TCP inventory, constrain the target, port range, concurrency and timeout. Treat connection results as an inventory signal, not proof of a vulnerability.",
+        "code_examples": [
+          "cargo add clap --features derive && cargo add tokio --features full",
+          "cargo run -- --host 127.0.0.1 --start 1 --end 1024 --timeout-ms 300"
+        ],
+        "qa": [{"question": "What limits make a lab scanner safer?", "answer": "An explicit authorized host, bounded port range, low concurrency, short timeout and no evasion or exploitation behavior."}]
+      }
+    ],
+    "blue_team_defense": {
+      "remediation": "Use Rust for memory-safe parsers, signed builds, least-privilege agents and deterministic defensive utilities. Pin and audit dependencies.",
+      "detection": "Monitor unexpected outbound connection bursts, unsigned binaries, unusual command-line arguments and new security-tool execution on production hosts.",
+      "checklist": ["Run cargo audit", "Pin dependencies and review Cargo.lock", "Use timeouts and bounded concurrency", "Redact secrets from logs", "Test only approved assets"]
+    }
+  }
+]

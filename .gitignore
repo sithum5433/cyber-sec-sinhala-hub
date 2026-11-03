@@ -1,0 +1,10 @@
+# Keep the public GitHub repository limited to the hosted site.
+*.pdf
+data/report.json
+data/modules.json
+*.py
+.agents/
+.codex/
+__pycache__/
+orion/
+checksums.md5

